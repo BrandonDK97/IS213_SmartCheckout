@@ -1,0 +1,12 @@
+{
+    "cartID": "int",
+    "createdDatetime": "datetime",
+    "customerID": "int",
+    "cartItems": [
+      {
+        "productID": "int(qty)"
+      }
+    ],
+    "storeID": "int",
+    "cartStatus": "boolean(currentCart?)"
+  }

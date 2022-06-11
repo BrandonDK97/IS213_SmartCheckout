@@ -1,0 +1,37 @@
+
+/*
+   * Custom translucent site header
+   */
+
+.navbar {
+    background-color: rgba(0, 0, 0, .85);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+    backdrop-filter: saturate(180%) blur(20px);
+}
+
+.navbar a {
+    color: #8e8e8e;
+    transition: color .15s ease-in-out;
+}
+
+.navbar a:hover {
+    color: #fff;
+    text-decoration: none;
+}
+
+#scannedItems{
+    margin-top:20px;
+}
+
+#container {
+    margin: 0px auto;
+    width: 500px;
+    height: 375px;
+    border: 10px #333 solid;
+}
+
+#videoElement {
+    width: 500px;
+    height: 375px;
+    background-color: #666;
+}

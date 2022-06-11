@@ -1,0 +1,68 @@
+version: "3.8"
+
+networks:
+  smartcheckout-net:
+    driver: bridge
+
+services:
+  #################################
+  # cart-mongodb: The NOSql data to store cart data
+  #################################
+
+  cart-mongodb:
+    image: mongo
+    networks:
+      - smartcheckout-net
+    environment:
+      - PUID=1000
+      - PGID=1000
+    ports:
+      - 27017:27017
+    restart: unless-stopped
+
+  #################################
+  # cartms: The Cart microservice that consumes cart-mongodb
+  #################################
+  cartms:
+    build:
+      context: ./cartMS/cart
+      dockerfile: cart.Dockerfile
+    image: carleb12345/esd:cartms
+    networks:
+      - smartcheckout-net
+    depends_on:
+      - cart-mongodb
+    ports:
+      - 5001:5001
+    environment:
+      PYTHONUNBUFFERED: 1
+    restart: always
+
+  #################################
+  # inventoryms: The inventory microserivce that is also a wrapper for the .net core MySQL Database
+  #################################
+  inventoryms:
+    build:
+      context: ./inventoryMS/InventoryAPI
+      dockerfile: inventoryms.Dockerfile
+    image: carleb12345/esd:inventoryms
+    networks:
+      - smartcheckout-net
+    depends_on:
+      - db
+    ports:
+      - "80:80"
+    restart: always
+  #################################
+  # db: The .net core MySQL Database for InvestoryAPI 
+  #################################
+  db:
+    image: "mcr.microsoft.com/mssql/server:latest"
+    networks:
+      - smartcheckout-net
+    environment:
+      - "ACCEPT_EULA=Y"
+      - "SA_PASSWORD=Password1!"
+    restart: always
+    ports:
+      - "1433:1433"

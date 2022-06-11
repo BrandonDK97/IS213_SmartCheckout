@@ -1,0 +1,3 @@
+docker build -t carleb123/cart .
+
+docker-compose up -d

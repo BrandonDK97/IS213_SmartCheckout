@@ -1,0 +1,24 @@
+services:
+  db:
+    environment:
+      ACCEPT_EULA: '"Y"'
+      SA_PASSWORD: '"Password@12345"'
+    image: mcr.microsoft.com/mssql/server:2019-latest
+  inventoryapi:
+    build:
+      context: C:\Users\brand\OneDrive\Documents\GitHub\IS4smth-ESD\inventoryMS\InventoryAPI
+      dockerfile: Dockerfile
+    depends_on:
+      db:
+        condition: service_started
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: https://+:443;http://+:80
+    image: inventoryapi
+    ports:
+    - target: 80
+    - target: 443
+    volumes:
+    - C:\Users\brand\AppData\Roaming\ASP.NET\Https:/root/.aspnet/https:ro
+    - C:\Users\brand\AppData\Roaming\Microsoft\UserSecrets:/root/.microsoft/usersecrets:ro
+version: '3.4'

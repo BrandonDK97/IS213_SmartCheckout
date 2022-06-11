@@ -1,0 +1,16 @@
+services:
+  inventoryapi:
+    build:
+      context: C:\Users\brand\OneDrive\Documents\GitHub\IS4smth-ESD\inventoryMS\InventoryAPI
+      dockerfile: Dockerfile
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: https://+:443;http://+:80
+    image: inventoryapi
+    ports:
+    - target: 80
+    - target: 443
+    volumes:
+    - C:\Users\brand\AppData\Roaming\ASP.NET\Https:/root/.aspnet/https:ro
+    - C:\Users\brand\AppData\Roaming\Microsoft\UserSecrets:/root/.microsoft/usersecrets:ro
+version: '3.4'

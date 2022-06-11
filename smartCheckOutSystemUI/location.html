@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+
+<head>
+    <title>location/store Tester</title>
+    <!-- CSS only -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+    <link href="./css/index.css" rel="stylesheet">
+</head>
+
+<body>
+    <header class="site-header sticky-top">
+        <nav class="navbar navbar-expand-lg">
+            <a class="navbar-brand mx-2" href="#">Smart Checkout System</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+            </div>
+            <div class="nav-item">
+                <a class="btn btn-outline-secondary  mx-2" href="login.html" onclick="logOut()">Log Out</a>
+            </div>
+        </nav>
+    </header>
+
+    <div class="text-center mt-3">
+        <h3 class="display-3 ">Find your nearest store</h3>
+    </div>
+
+    <div id="googleMap" class="container" style="width:100%;height:400px;"></div>
+
+    <div class="text-center">
+        <h3 class="text-center mt-3">
+            This is your current location
+        </h3>
+        <br>
+        Longitude : <span id="long">N.A</span>
+        <br>
+        Latitude : <span id="lat">N.A</span>
+
+        <br>
+        <br>
+        <br>
+
+        <div id="result">
+            Nearest Store : <span id="store"></span> <br>
+            Distance : <span id="distance"></span> <br>
+            <a name="" target="_blank" style="display: none;" id="getLocation" class="btn btn-dark w-25 my-2 m-auto" href="#" role="button">Get directions to store</a>
+        </div>
+        <button name="" id="findStore" class="btn btn-dark mt-3" href="#" onclick="checkStore()">Find my nearest store</button>
+        <button name="" id="continueShopping" class="btn btn-dark mt-3" href="#" onclick="continueShop()" disabled>Continue Shopping</button>
+    </div>
+</body>
+
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBToAWC0DE-zlTHF5M9W8VyUCeTNuVlZ3I&callback=myMap" async
+    defer></script>
+<!-- JavaScript Bundle with Popper -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p"
+    crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+<script>
+    var serviceHostName = "127.0.0.1";
+    // get user location
+    currentLocation = "no location"
+    function continueShop(){
+        window.location="/smartCheckOutSystemUI/product/product.html"
+    }
+    function success(position) {
+        const latitude = position.coords.latitude;
+        const longitude = position.coords.longitude;
+        currentLocation = { latitude: latitude, longitude: longitude }
+
+        document.getElementById('long').innerText = currentLocation.longitude
+        document.getElementById('lat').innerText = currentLocation.latitude
+
+        myMap(latitude, longitude)
+    }
+
+    function error() {
+        console.log(currentLocation)
+    }
+
+    if (!navigator.geolocation) {
+        alert('Geolocation is not supported by your browser');
+    } else {
+        navigator.geolocation.getCurrentPosition(success, error);
+
+    }
+
+
+    function checkStore() {
+        postBody = {
+            "longitude": currentLocation.longitude,
+            "latitude": currentLocation.latitude
+        }
+        axios.post('http://'+ serviceHostName +':8000/api/v1/location', postBody)
+            .then(response => {
+                data = response.data
+                console.log(data)
+                stores = ['SMU Store', 'Tampines Store']
+                currentStore = data["location"]
+                console.log(currentStore)
+                if (stores.includes(currentStore)) {
+                    console.log(data)
+                    lat = data["lat"]                    
+                    long = data["long"]
+                    sessionStorage.setItem("location", currentStore) // session storage
+                    document.getElementById('store').innerText = currentStore
+                    document.getElementById('distance').innerText = data["distance from store (KM)"]
+                    document.getElementById('findStore').disabled = true
+                    document.getElementById('continueShopping').disabled = false
+                    var link = "https://maps.google.com/?q="+ lat +","+ long
+                    document.getElementById('getLocation').style.display = "block"
+                    document.getElementById('getLocation').href = link
+                }
+                else {
+                    document.getElementById('store').innerText = "You need to be in a store to use the service"
+                }
+
+            })
+            .catch(error => {
+                element.parentElement.innerHTML = `Error: ${error.message}`;
+                console.error('There was an error!', error);
+            });
+
+    }
+    function logOut() {
+        sessionStorage.removeItem("userId")
+        sessionStorage.removeItem("location")
+    }
+</script>
+<script async defer>
+    function myMap(lat, long) {
+        var mapProp = {
+            center: new google.maps.LatLng(lat, long),
+            zoom: 20,
+        };
+        var map = new google.maps.Map(document.getElementById("googleMap"), mapProp);
+    }
+</script>
+
+</html>

@@ -1,0 +1,5 @@
+Flask==2.0.2
+Flask-Cors==3.0.10
+pika==1.2.0
+requests==2.25.1
+stripe==2.67.0

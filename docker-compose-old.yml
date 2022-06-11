@@ -1,0 +1,283 @@
+version: "3.8"
+
+networks:
+  smartcheckout-net:
+    driver: bridge
+
+volumes:
+  rabbitmq_data:
+  mongodb_data:
+  kongdb:
+  kongadata:
+
+services:
+  ####################################
+  # RabbitMQ: The messaging broker   
+  ####################################
+  rabbitmq:
+    image: rabbitmq:3-management
+    restart: always
+    networks:
+      - smartcheckout-net
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+
+  #################################
+  # activitylogms: The Activity Logging microservice
+  #################################
+  activitylogms:
+    build:
+      context: ./activitylogMS/activitylogMS/
+      dockerfile: activity.Dockerfile
+    image: carleb12345/esd:activitylogms
+    networks:
+      - smartcheckout-net
+    depends_on:
+      - rabbitmq
+    restart: always
+    environment:
+      rabbit_host: rabbitmq
+      rabbit_port: 5672
+      PYTHONUNBUFFERED: 1
+
+  #################################
+  # errorlogms: The Error Logging microservice
+  #################################
+  errorlogms:
+    build:
+      context: ./activitylogMS/errorLogMS
+      dockerfile: error.Dockerfile
+    image: carleb12345/esd:errorlogms
+    networks:
+      - smartcheckout-net
+    depends_on:
+      - rabbitmq
+    restart: always
+    environment:
+      rabbit_host: rabbitmq
+      rabbit_port: 5672
+      PYTHONUNBUFFERED: 1
+
+  #################################
+  # accountms: The Account CRUD microservice for accountcomplexMS
+  #################################
+  accountms:
+    build:
+      context: ./accountMS/accountMS
+      dockerfile: account.Dockerfile
+    image: carleb12345/esd:accountms
+    networks:
+      - smartcheckout-net
+    depends_on:
+      - rabbitmq
+    restart: always
+    ports:
+      - 5003:5003
+    environment:
+      PYTHONUNBUFFERED: 1
+
+  #################################
+  # stripems: The stripe(payment) microservice
+  #################################
+  stripems:
+    build:
+      context: ./stripeMS
+      dockerfile: stripems.Dockerfile
+    image: carleb12345/esd:stripems
+    networks:
+      - smartcheckout-net
+    depends_on:
+      - rabbitmq
+    restart: always
+    ports:
+      - 5002:5002
+    environment:
+      stripe_api_key: sk_test_51Kc9J2LLSNdGsMUOS8DYewqsFwrVDIlnJpUbLh1Kh2Kyt0oXhdCqeTBfOjAZFH1QyVpnSZseutTCPsJ49Q6BY81M00JdlN4TBb
+      PYTHONUNBUFFERED: 1
+
+
+  #################################
+  # accountcomplexms: The complex account microservice that consumes stripems and accountms
+  #################################
+  accountcomplexms:
+    build:
+      context: ./accountMS/accountComplexMS
+      dockerfile: accountComplex.Dockerfile
+    image: carleb12345/esd:accountcomplexms
+    networks:
+      - smartcheckout-net
+    depends_on:
+      - rabbitmq
+      - stripems
+      - accountms
+    restart: always
+    ports:
+      - 5000:5000
+    environment:
+      rabbit_host: rabbitmq
+      stripe_host: http://stripems:5002
+      account_host: http://accountms:5003
+
+  #################################
+  # cart-mongodb: The NOSql data to store cart data
+  #################################
+
+  cart-mongodb:
+    image: mongo
+    networks:
+      - smartcheckout-net
+    environment:
+      - PUID=1000
+      - PGID=1000
+    volumes:
+      - mongodb_data:/data/db
+    ports:
+      - 27017:27017
+    restart: unless-stopped
+
+  #################################
+  # cartms: The Cart microservice that consumes cart-mongodb
+  #################################
+  cartms:
+    build:
+      context: ./cartMS/cart
+      dockerfile: cart.Dockerfile
+    image: carleb12345/esd:cartms
+    networks:
+      - smartcheckout-net
+    depends_on:
+      - cart-mongodb
+    ports:
+      - 5001:5001
+    restart: always
+
+  #################################
+  # checkoutms: The Checkout complex microservice that consumes accountms, cartms, inventoryms and stripems
+  #################################
+  checkoutms:
+    build:
+      context: ./checkoutMS
+      dockerfile: checkout.Dockerfile
+    image: carleb12345/esd:checkoutms
+    networks:
+      - smartcheckout-net
+    depends_on:
+      - rabbitmq
+      - stripems
+      - accountms
+    ports:
+      - 5004:5004
+    restart: always
+    environment:
+      account_host: http://accountms:5003
+      cart_host: http://cartms:5001
+      inventory_host: http://inventoryms:80
+      stripe_host: http://stripems:5002
+      rabbit_host: rabbitmq
+
+  #################################
+  # addtocart: The Add To Cart complex microservice that consumes accountms, cartms, inventoryms and stripems
+  #################################
+  addtocartms:
+    build:
+      context: ./cartMS/addtoCartComplexMS
+      dockerfile: addtocart.Dockerfile
+    image: carleb12345/esd:addtocartms
+    networks:
+      - smartcheckout-net
+    depends_on:
+      - rabbitmq
+      - stripems
+      - accountms
+    ports:
+      - 5030:5030
+    restart: always
+    environment:
+      account_host: http://accountms:5003
+      cart_host: http://cartms:5001
+      inventory_host: http://inventoryms:80
+      stripe_host: http://stripems:5002
+      rabbit_host: rabbitmq
+
+  #################################
+  # locationms: The .net core MySQL Database for InvestoryAPI 
+  #################################
+  locationms:
+    build:
+      context: ./locationMS
+      dockerfile: locationms.Dockerfile
+    image: carleb12345/esd:locationms
+    networks:
+      - smartcheckout-net
+    depends_on:
+      - rabbitmq
+    ports:
+      - 5006:5006
+    restart: always
+    environment:
+      account_host: http://accountms:5003
+      cart_host: http://cartms:5001
+      inventory_host: http://inventoryms:80
+      stripe_host: http://stripems:5002
+      rabbit_host: rabbitmq
+
+  #################################
+  # inventoryms: The inventory microserivce that is also a wrapper for the .net core MySQL Database
+  #################################
+  inventoryms:
+    build:
+      context: ./inventoryMS/InventoryAPI
+      dockerfile: inventoryms.Dockerfile
+    image: carleb12345/esd:inventoryms
+    networks:
+      - smartcheckout-net
+    depends_on:
+      - db
+    ports:
+      - "80:80"
+    restart: always
+  #################################
+  # db: The .net core MySQL Database for InvestoryAPI 
+  #################################
+  db:
+    image: "mcr.microsoft.com/mssql/server:latest"
+    networks:
+      - smartcheckout-net
+    environment:
+      - "ACCEPT_EULA=Y"
+      - "SA_PASSWORD=Password1!"
+    restart: always
+    ports:
+      - "1433:1433"
+  #################################
+  # kongnodb: The API Gateway that reroutes complex Microservices for Web UIs. Kong No DB is a declarative kong api gateway that allows configuration to be stored persistently 
+  #################################
+
+  kongnodb:
+    build:
+      context: ./kong/declarative
+      dockerfile: kong.Dockerfile
+    image: carleb12345/esd:kongnodb
+    restart: always
+    networks:
+      - smartcheckout-net
+    environment:
+      KONG_DATABASE: "off"
+      KONG_DECLARATIVE_CONFIG: kong.yml
+      KONG_ADMIN_LISTEN: 0.0.0.0:8001, 0.0.0.0:8444 ssl
+      KONG_PROXY_LISTEN: 0.0.0.0:8000, 0.0.0.0:8443 ssl, 0.0.0.0:9080 http2, 0.0.0.0:9081 http2 ssl
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://kong:8000" ]
+      interval: 5s
+      timeout: 10s
+      retries: 15
+    ports:
+      - "8001:8001"
+      - "8444:8444"
+      - "8000:8000"
+      - "8443:8443"
+      - "9080:9080"
+      - "9081:9081"

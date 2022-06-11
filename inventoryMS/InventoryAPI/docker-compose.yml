@@ -1,0 +1,21 @@
+version: '3.4'
+
+services:
+  db:
+    image: "mcr.microsoft.com/mssql/server:latest"
+    environment:
+      - "ACCEPT_EULA=Y"
+      - "SA_PASSWORD=Password1!"
+    restart: always
+    ports:
+      - "1433:1433"
+
+  inventoryapi:
+    image: ${DOCKER_REGISTRY-}inventoryapi
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      - db
+    ports:
+      - "80:80"

@@ -1,0 +1,41 @@
+
+
+
+
+
+
+
+
+kubectl port-forward kongnodb-599877f59d-45vw5 8000:8000
+
+
+minikube start
+
+kubectl apply -f ./
+
+minikube dashboard
+
+minikube tunnel --cleanup
+
+minikube delete 
+
+kubectl get services                          # List all services in the namespace
+
+kubectl get pods --all-namespaces             # List all pods in all namespaces
+
+kubectl -n default rollout restart deploy
+
+on wsl
+
+kubectl port-forward kongnodb-6857c4bcb6-tdjlc 8000:8000
+
+"C:\\Users\\caleb\\.kube\\config"
+
+echo "nameserver 8.8.8.8" | sudo tee /etc/resolv.conf > /dev/null
+sudo apt install socat
+socat tcp-listen:8000,reuseaddr,fork tcp:localhost:8000
+socat TCP-LISTEN:8080,fork,reuseaddr TCP:localhost:8000
+
+
+# {"userid":"brandon123456","card":
+{"number":"4000056655665556","exp_month":3,"exp_year":2023,"cvc":"314"}}
