@@ -4,7 +4,7 @@ import amqp_setup
 import requests
 
 
-API_KEY = '5304110899:AAEBu9BUMvaQiyRervuUpqaMHlJHMnDvs3g' 
+API_KEY = '' 
 monitorBindingKey='*.error'
 
 telegramSubscribers = ['670764767','69639099','300702075']
