@@ -21,7 +21,10 @@ The goal of this project is to expedite the checkout process with the **Smart Ch
 https://hub.docker.com/repository/docker/carleb12345/esd
 
 # Technical Overview Diagram
-<img src="ReadmeFiles\overview.png">
+<img src="ReadmeFiles\overview_new.png">
+
+# Cloud Native Design
+<img src="ReadmeFiles\native.png">
 
 # How to Set Up Smart Checkout System with Docker
 1. Clone our GitHub Repository or download the ZIP file
