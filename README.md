@@ -119,12 +119,12 @@ https://console.firebase.google.com/u/0/project/is213-userdata/database/is213-us
 
 **G9 Team 7**
 
-<table style="border:0.5px solid;">
+<table>
     <tr>
-        <td align="center"><img src="" width="150px;" alt=""/><br /><sub><b>Brandon</b></sub></a></td>
-        <td align="center"><img src="" width="150px;" alt=""/><br /><sub><b>Caleb</b></sub></a></td>
-        <td align="center"><img src="" width="150px;" alt=""/><br /><sub><b>Rou</b></sub></a></td>
-        <td align="center"><img src="" width="150px;" alt=""/><br /><sub><b>Gerald</b></sub></a></td>
-        <td align="center"><img src="" width="150px;" alt=""/><br /><sub><b>Yan Wee</b></sub></a></td>
+        <td align="center"><img src="ReadmeFiles\brandon.jpg" width="150px;" alt=""/><br /><sub><b>Brandon</b></sub></a></td>
+        <td align="center"><img src="ReadmeFiles\caleb.jpg" width="150px;" alt=""/><br /><sub><b>Caleb</b></sub></a></td>
+        <td align="center"><img src="ReadmeFiles\rou.jpeg" width="150px;" alt=""/><br /><sub><b>Ching Rou</b></sub></a></td>
+        <td align="center"><img src="ReadmeFiles\gerald.jpg" width="150px;" alt=""/><br /><sub><b>Gerald</b></sub></a></td>
+        <td align="center"><img src="ReadmeFiles\yanwee.jpg" width="150px;" alt=""/><br /><sub><b>Yan Wee</b></sub></a></td>
     </tr>
 </table>
