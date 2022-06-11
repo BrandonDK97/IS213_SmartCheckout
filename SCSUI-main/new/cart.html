@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <title>SCS-Cart</title>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="./js/cart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/flowbite@1.4.4/dist/flowbite.min.css" />
+</head>
+
+<body onload="getCart()">
+    <header class="shadow-sm">
+        <div class="max-w-screen-xl px-3 mx-auto">
+            <div class="flex items-center justify-between space-x-4 lg:space-x-10">
+                <div  class="flex lg:w-0 lg:flex-1 font-bold">
+                    <a href="./product.html">Smart Checkout System</a>
+                </div>
+
+
+                <div class="flex items-center border-gray-100 divide-x divide-gray-100 border-x">
+                    <span>
+                        <a href="./cart.html" class="block p-6 border-b-4 border-transparent hover:border-red-700">
+                            <span id='cartItems' class="absolute items-center justify-center px-2 py-0\.5 text-2xs font-bold text-white transform translate-x-3 -translate-y-3 bg-gray-600 rounded-full hidden"></span>
+
+                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                            </svg>
+                            
+
+                            <span class="sr-only">Cart</span>
+                        </a>
+                    </span>
+                </div>
+
+                <button class="px-5 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-blue-800 rounded-lg" onclick="logOut()">
+                    Log out
+                </button>
+            </div>
+
+            <!-- <div class="lg:hidden">
+                <button class="p-2 text-gray-600 bg-gray-100 rounded-lg" type="button">
+                    <span class="sr-only">Open menu</span>
+                    <svg aria-hidden="true" class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg">
+                        <path d="M4 6h16M4 12h16M4 18h16" stroke-linecap="round" stroke-linejoin="round"
+                            stroke-width="2" />
+                    </svg>
+                </button>
+            </div> -->
+        </div>
+        </div>
+    </header>
+
+    <!-- Alert Success Checkout -->
+    <div id='checkoutSuccessAlert'class="bg-teal-100 border-t-4 border-teal-500 rounded-b text-teal-900 px-4 py-3 hidden" role="alert">
+        <div class="flex">
+          <div class="py-1"><svg class="fill-current h-6 w-6 text-teal-500 mr-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M2.93 17.07A10 10 0 1 1 17.07 2.93 10 10 0 0 1 2.93 17.07zm12.73-1.41A8 8 0 1 0 4.34 4.34a8 8 0 0 0 11.32 11.32zM9 11V9h2v6H9v-4zm0-6h2v2H9V5z"/></svg></div>
+          <div>
+            <p class="font-bold">Your items have been checked out</p>
+            <p class="text-sm">Thank you for using the Smart Checkout System.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Alert Unsuccessful Checkout -->
+      <div id="checkoutUnsuccessfulAlert" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative hidden" role="alert">
+        <strong class="font-bold">Unable to check items out,</strong>
+        <span class="block sm:inline">please check if card is still valid.</span>
+        <span class="absolute top-0 bottom-0 right-0 px-4 py-3">
+            <svg onclick="hideAlert()" class="fill-current h-6 w-6 text-red-500" role="button" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><title>Close</title><path d="M14.348 14.849a1.2 1.2 0 0 1-1.697 0L10 11.819l-2.651 3.029a1.2 1.2 0 1 1-1.697-1.697l2.758-3.15-2.759-3.152a1.2 1.2 0 1 1 1.697-1.697L10 8.183l2.651-3.031a1.2 1.2 0 1 1 1.697 1.697l-2.758 3.152 2.758 3.15a1.2 1.2 0 0 1 0 1.698z"/></svg>
+        </span>
+    </div>
+        </span>
+      </div>
+
+    <!-- Content -->
+    <section>
+        <h1 class="sr-only">Checkout</h1>
+
+        <div class="relative mx-auto max-w-screen-2xl">
+            <div class="grid grid-cols-1 md:grid-cols-2">
+                <div class="py-12 bg-gray-50 md:py-24">
+                    <div class="max-w-lg px-4 mx-auto lg:px-8">
+                        <div class="flex items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                            </svg>
+
+                            <h2 class="ml-4 font-medium">Your Cart</h2>
+                        </div>
+
+                        <div class="mt-8">
+                            <p class="text-2xl font-medium tracking-tight" id="total_price"></p>
+                            <p class="mt-1 text-sm text-gray-500">For the purchase of</p>
+                        </div>
+
+                        <div class="mt-12">
+                            <div class="flow-root">
+                                <ul id="content" class="-my-4 divide-y divide-gray-200">
+
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="mt-8">
+                            <p class="text-2xl font-medium tracking-tight" id="total_quantity"></p>
+                            <p class="mt-1 text-sm text-gray-500">item(s) in your cart</p>
+                        </div>
+
+                    </div>
+                </div>
+                
+                <div class="py-12 bg-white md:py-24">
+                    
+                    <div class="max-w-lg px-4 mx-auto align-middle lg:px-8">
+                        <!-- Checkout -->
+                        <div class="flex items-center">
+                            <h2 class="ml-4 font-medium text-center">When you are ready to checkout, click below to pay
+                                using <span class="text-3xl" style="color: #665BFF;">Stripe</span></h2>
+                        </div>
+
+
+                        <button id="checkoutSubmit" type="button" onclick="checkout()"
+                            class="mt-4 block w-full px-5 py-3 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700">
+                            Checkout
+                        </button>
+                        <button disabled id="checkoutLoading" type="button" class="w-full text-white bg-green-600 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-3 text-center hidden">
+                            <svg role="status" class="inline w-4 h-4 mr-1 text-gray-200 animate-spin dark:text-gray-600 fill-green-600" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="currentColor"/>
+                                <path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" fill="currentFill"/>
+                            </svg>
+                            Loading...
+                        </button>
+                        <a  href="./product.html">
+                            <button type="button" class="mt-4 block w-full px-5 py-3 text-sm font-medium text-white bg-gray-600 rounded-lg hover:bg-gray-700">
+                            Continue Shopping
+                            </button>
+                        </a>
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <footer class="text-center">
+        <div class="max-w-screen-xl px-4 py-12 mx-auto sm:px-6 lg:px-8">
+            <div class="max-w-3xl mx-auto space-y-6">
+                <div class="flex justify-center space-x-6">
+                    <a class="text-blue-500 hover:text-opacity-75" href="/twitter" target="_blank"
+                        rel="noopener noreferrer" aria-label="Twitter">
+                        <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <path
+                                d="M8.29 20.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0022 5.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.072 4.072 0 012.8 9.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 012 18.407a11.616 11.616 0 006.29 1.84">
+                            </path>
+                        </svg>
+                    </a>
+
+                    <a class="text-gray-900 hover:text-opacity-75" href="https://github.com/RodentOfUnusualSizee/IS4smth-ESD" target="_blank"
+                        rel="noopener noreferrer" aria-label="GitHub">
+                        <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <path fill-rule="evenodd"
+                                d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"
+                                clip-rule="evenodd"></path>
+                        </svg>
+                    </a>
+                </div>
+
+                <p class="max-w-lg mx-auto text-xs text-gray-500">
+                    SCS was created with the goal of providing a platform for customers to shop without queuing in line.
+                </p>
+
+                <p class="text-xs font-medium">2022 ESD</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        function logOut() {
+            sessionStorage.removeItem('userId')
+            sessionStorage.removeItem('location')
+            window.location.replace('./index.html')
+        }
+        function hideAlert(){
+            document.getElementById('checkoutUnsuccessfulAlert').className = "bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative hidden"
+        }
+        function loadCartNoti(){
+            if(sessionStorage['cartItems'] > 0){
+                document.getElementById('cartItems').className = 'absolute items-center justify-center px-2 py-0\.5 text-2xs font-bold text-white transform translate-x-3 -translate-y-3 bg-gray-600 rounded-full'
+                document.getElementById('cartItems').innerText = sessionStorage['cartItems']
+            }
+            
+        }
+
+        loadCartNoti();
+    </script>
+</body>
